@@ -73,4 +73,4 @@ def trainingFace():
     f = open("le.pickle", "wb")
     f.write(pickle.dumps(le))
     f.close()
-
+    return 1
