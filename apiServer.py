@@ -70,7 +70,6 @@ def training_process():
             val_update = (1, str(dataReq["code"]))
             cursor.execute(sql_update, val_update)
             mysql.connection.commit()
-            shutil.rmtree(directory)
 
             cursor.close()
             return jsonify(
@@ -112,7 +111,7 @@ def recognition_process():
         datetime_begin = today+" 00:00:00"
         datetime_end = today+" 23:59:59"
 
-        sqlCheckAttendanced = "SELECT * FROM attendances WHERE user_code='" + faceRecognized + "' AND (datetime > '"+datetime_begin+"' AND datetime < '"+datetime_end+"') "
+        sqlCheckAttendanced = "SELECT * FROM attendances WHERE user_code='" + faceRecognized + "' AND (check_in > '"+datetime_begin+"' AND check_in < '"+datetime_end+"') "
 
         cursor.execute(sqlCheckAttendanced)
         dataQuery = cursor.fetchone()
@@ -134,8 +133,8 @@ def recognition_process():
             datetime_pivot = today+" 08:00:00"
             is_late = 1 if (datetime_now > datetime_pivot) else 0
 
-            sql_insert = "INSERT INTO attendances (user_id, user_code, datetime, is_late, created_at, updated_at) VALUES (%s,%s,%s,%s,%s,%s)"
-            sql_val = (user_id, str(faceRecognized), datetime_now, is_late,datetime_now,datetime_now)
+            sql_insert = "INSERT INTO attendances (user_id, user_code,image_face, check_in,check_out, time, is_late, created_at, updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            sql_val = (user_id, str(faceRecognized), str(dataReq["image"]) ,datetime_now,'', '', is_late, datetime_now, datetime_now)
 
             cursor.execute(sql_insert, sql_val)
             mysql.connection.commit()
@@ -148,6 +147,7 @@ def recognition_process():
                     status=200,
                     data=[
                         {
+                            "face_image": dataReq["image"],
                             "user_id":dataQuery[0],
                             "user_code":dataQuery[1],
                             "name":dataQuery[2],
